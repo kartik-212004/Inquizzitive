@@ -171,7 +171,7 @@ const Text_Input = () => {
         }
         localStorage.setItem("previousQuizzes", JSON.stringify(previousQuizzes));
 
-        window.location.href = "output";
+        window.location.href = "/output";
       } else {
         console.error("Backend request failed.");
       }

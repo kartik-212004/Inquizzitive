@@ -1,14 +1,20 @@
 import React from "react";
 import { FaFileAlt, FaChartBar, FaMicrophone, FaUsers, FaHistory, FaYoutube } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import "../index.css";
+import FloatingBooks from "../components/FloatingBooks";
 
 const Home = () => {
   return (
     <div className="w-screen min-h-screen bg-slate-800 overflow-x-hidden">
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-slate-700/40 to-slate-900 opacity-70 fixed"></div>
+      {/* Background gradient */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-slate-700/40 to-slate-900 opacity-70 fixed z-0"></div>
+      
+      {/* Floating Books Animation */}
+      <FloatingBooks />
       
       {/* Main Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
+      <div className="relative z-20 max-w-6xl mx-auto px-6 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -27,8 +33,8 @@ const Home = () => {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {/* Text Quiz Generator */}
-          <a 
-            href="/question-type"
+          <Link 
+            to="/question-type"
             className="bg-slate-700/80 rounded-xl p-6 shadow-lg transform transition duration-300 hover:scale-105 hover:bg-slate-700 flex flex-col h-full"
           >
             <div className="bg-amber-400/20 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -41,11 +47,11 @@ const Home = () => {
             <button className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-medium py-2 px-4 rounded-lg transition duration-200 mt-auto w-full">
               Create Quiz
             </button>
-          </a>
+          </Link>
           
           {/* Voice Quiz Generator */}
-          <a 
-            href="/voice-to-quiz"
+          <Link 
+            to="/voice-to-quiz"
             className="bg-slate-700/80 rounded-xl p-6 shadow-lg transform transition duration-300 hover:scale-105 hover:bg-slate-700 flex flex-col h-full"
           >
             <div className="bg-purple-500/20 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -61,11 +67,11 @@ const Home = () => {
             <button className="bg-purple-500 hover:bg-purple-400 text-white font-medium py-2 px-4 rounded-lg transition duration-200 w-full">
               Try Voice Input
             </button>
-          </a>
+          </Link>
           
           {/* YouTube Quiz Generator */}
-          <a 
-            href="/youtube-quiz"
+          <Link 
+            to="/youtube-quiz"
             className="bg-slate-700/80 rounded-xl p-6 shadow-lg transform transition duration-300 hover:scale-105 hover:bg-slate-700 flex flex-col h-full"
           >
             <div className="bg-red-500/20 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -78,11 +84,11 @@ const Home = () => {
             <button className="bg-red-500 hover:bg-red-400 text-white font-medium py-2 px-4 rounded-lg transition duration-200 mt-auto w-full">
               YouTube Quiz
             </button>
-          </a>
+          </Link>
           
           {/* Collaborative Quiz */}
-          <a 
-            href="/collaborate"
+          <Link 
+            to="/collaborate"
             className="bg-slate-700/80 rounded-xl p-6 shadow-lg transform transition duration-300 hover:scale-105 hover:bg-slate-700 flex flex-col h-full"
           >
             <div className="bg-blue-500/20 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -98,11 +104,11 @@ const Home = () => {
             <button className="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition duration-200 w-full">
               Collaborate
             </button>
-          </a>
+          </Link>
           
           {/* Previous Quizzes */}
-          <a 
-            href="/previous"
+          <Link 
+            to="/previous"
             className="bg-slate-700/80 rounded-xl p-6 shadow-lg transform transition duration-300 hover:scale-105 hover:bg-slate-700 flex flex-col h-full"
           >
             <div className="bg-green-500/20 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -115,11 +121,11 @@ const Home = () => {
             <button className="bg-green-500 hover:bg-green-400 text-white font-medium py-2 px-4 rounded-lg transition duration-200 mt-auto w-full">
               View History
             </button>
-          </a>
+          </Link>
           
           {/* Analytics */}
-          <a 
-            href="/analytics"
+          <Link 
+            to="/analytics"
             className="bg-slate-700/80 rounded-xl p-6 shadow-lg transform transition duration-300 hover:scale-105 hover:bg-slate-700 flex flex-col h-full"
           >
             <div className="bg-amber-500/20 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -135,7 +141,7 @@ const Home = () => {
             <button className="bg-amber-500 hover:bg-amber-400 text-white font-medium py-2 px-4 rounded-lg transition duration-200 w-full">
               View Analytics
             </button>
-          </a>
+          </Link>
         </div>
         
         {/* Info Banner */}
@@ -148,9 +154,11 @@ const Home = () => {
               </p>
             </div>
             <div className="flex-shrink-0">
-              <button className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-3 px-6 rounded-lg transition duration-200">
-                Start Creating
-              </button>
+              <Link to="/question-type">
+                <button className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-3 px-6 rounded-lg transition duration-200">
+                  Start Creating
+                </button>
+              </Link>
             </div>
           </div>
         </div>

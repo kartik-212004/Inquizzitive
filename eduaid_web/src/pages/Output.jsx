@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import "../index.css";
 import { FaArrowLeft, FaFilePdf, FaGoogle, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Output = () => {
   const [qaPairs, setQaPairs] = useState([]);
@@ -319,9 +320,9 @@ const Output = () => {
       <div className="relative z-10 max-w-4xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <a href="/input" className="text-gray-400 hover:text-amber-400 flex items-center">
+          <Link to="/text-input" className="text-gray-400 hover:text-amber-400 flex items-center">
             <FaArrowLeft className="mr-2" /> Back
-          </a>
+          </Link>
           
           <div className="text-3xl text-center font-bold">
             <span className="bg-gradient-to-r from-amber-400 to-amber-300 text-transparent bg-clip-text">

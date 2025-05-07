@@ -27,3 +27,4 @@ backend/token.json
 venv
 backend/Inquizzitive
 .DS_Store
+.node_modules

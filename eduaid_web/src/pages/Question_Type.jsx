@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../index.css";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Question_Type = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -23,9 +24,9 @@ const Question_Type = () => {
       <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-2xl px-6 mx-auto py-8">
         {/* Header */}
         <div className="w-full flex justify-between items-center mb-8">
-          <a href="/" className="text-gray-400 hover:text-amber-400 flex items-center">
+          <Link to="/" className="text-gray-400 hover:text-amber-400 flex items-center">
             <FaArrowLeft className="mr-2" /> Back
-          </a>
+          </Link>
           
           <div className="text-3xl text-center font-bold">
             <span className="bg-gradient-to-r from-amber-400 to-amber-300 text-transparent bg-clip-text">
@@ -123,7 +124,7 @@ const Question_Type = () => {
         {/* Continue Button */}
         <div className="flex justify-center mt-4">
           {selectedOption ? (
-            <a href="input">
+            <Link to="/text-input">
               <button
                 onClick={handleSaveToLocalStorage}
                 className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-medium py-3 px-8 rounded-full flex items-center transition duration-300"
@@ -131,7 +132,7 @@ const Question_Type = () => {
                 Continue
                 <FaArrowRight className="ml-2" />
               </button>
-            </a>
+            </Link>
           ) : (
             <button
               onClick={() => alert("Please select a question type.")}
