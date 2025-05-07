@@ -342,13 +342,6 @@ const Output = () => {
           <p className="text-gray-300 text-lg">
             {qaPairs.length} {qaPairs.length === 1 ? 'question' : 'questions'} created
           </p>
-          
-          {/* Validation message */}
-          {localStorage.getItem("validationMessage") && (
-            <div className="mt-3 text-amber-300 bg-amber-300/10 border border-amber-300/30 rounded-lg p-3 mx-auto max-w-2xl">
-              {localStorage.getItem("validationMessage")}
-            </div>
-          )}
         </div>
         
         {/* Questions List */}
