@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { FaArrowLeft, FaUsers, FaCopy, FaLock, FaCheck, FaPlus, FaUserCircle } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaUsers,
+  FaCopy,
+  FaLock,
+  FaCheck,
+  FaPlus,
+  FaUserCircle,
+} from "react-icons/fa";
 import "../index.css";
 
 const Collaborate = () => {
@@ -54,8 +62,11 @@ const Collaborate = () => {
       // In a real implementation, this would create a session on the server
       setTimeout(() => {
         // Generate a random 6-character code
-        const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        
+        const generatedId = Math.random()
+          .toString(36)
+          .substring(2, 8)
+          .toUpperCase();
+
         // Create a session object
         const sessionData = {
           id: generatedId,
@@ -67,32 +78,39 @@ const Collaborate = () => {
               id: "host-" + Math.random().toString(36).substring(2, 9),
               name: displayName,
               isHost: true,
-              joinedAt: new Date().toISOString()
-            }
+              joinedAt: new Date().toISOString(),
+            },
           ],
-          quizzes: []
+          quizzes: [],
         };
-        
+
         // Save session data to localStorage (would normally be on server)
-        localStorage.setItem("currentCollaborativeSession", JSON.stringify(sessionData));
-        localStorage.setItem("collaborativeSessionsList", JSON.stringify([
-          ...(JSON.parse(localStorage.getItem("collaborativeSessionsList")) || []),
-          {
-            id: sessionData.id,
-            name: sessionData.name,
-            createdAt: sessionData.createdAt
-          }
-        ]));
-        
+        localStorage.setItem(
+          "currentCollaborativeSession",
+          JSON.stringify(sessionData)
+        );
+        localStorage.setItem(
+          "collaborativeSessionsList",
+          JSON.stringify([
+            ...(JSON.parse(localStorage.getItem("collaborativeSessionsList")) ||
+              []),
+            {
+              id: sessionData.id,
+              name: sessionData.name,
+              createdAt: sessionData.createdAt,
+            },
+          ])
+        );
+
         // Save user name for future use
         localStorage.setItem("collaborateUserName", displayName);
-        
+
         // Update state
         setSessionId(generatedId);
         setSessionCreated(true);
         setLocalSession(sessionData);
         setParticipants(sessionData.participants);
-        
+
         setIsCreatingSession(false);
       }, 1500);
     } catch (error) {
@@ -121,7 +139,7 @@ const Collaborate = () => {
       setTimeout(() => {
         // This is just for demo/hackathon purposes
         // In a real app, we would verify this code against a database
-        
+
         // Create a simulated session if the user entered the "demo" code
         if (joinCode.toUpperCase() === "DEMO12") {
           const sessionData = {
@@ -134,29 +152,34 @@ const Collaborate = () => {
                 id: "host-demo",
                 name: "Instructor Demo",
                 isHost: true,
-                joinedAt: new Date(Date.now() - 3600000).toISOString()
+                joinedAt: new Date(Date.now() - 3600000).toISOString(),
               },
               {
                 id: "user-" + Math.random().toString(36).substring(2, 9),
                 name: displayName,
                 isHost: false,
-                joinedAt: new Date().toISOString()
-              }
+                joinedAt: new Date().toISOString(),
+              },
             ],
-            quizzes: []
+            quizzes: [],
           };
-          
-          localStorage.setItem("currentCollaborativeSession", JSON.stringify(sessionData));
+
+          localStorage.setItem(
+            "currentCollaborativeSession",
+            JSON.stringify(sessionData)
+          );
           localStorage.setItem("collaborateUserName", displayName);
-          
+
           setLocalSession(sessionData);
           setParticipants(sessionData.participants);
           setSessionCreated(true);
           setIsJoiningSession(false);
           return;
         }
-        
-        setErrorMessage("Session not found. Please check the code and try again.");
+
+        setErrorMessage(
+          "Session not found. Please check the code and try again."
+        );
         setIsJoiningSession(false);
       }, 1500);
     } catch (error) {
@@ -166,11 +189,16 @@ const Collaborate = () => {
   };
 
   const copySessionCode = () => {
-    navigator.clipboard.writeText(sessionId);
-    setCopiedToClipboard(true);
-    setTimeout(() => setCopiedToClipboard(false), 2000);
+    navigator.clipboard
+      .writeText(sessionId) // ✅ Correct method for copying text
+      .then(() => {
+        setCopiedToClipboard(true);
+        setTimeout(() => setCopiedToClipboard(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
   };
-
   const exitSession = () => {
     localStorage.removeItem("currentCollaborativeSession");
     setLocalSession(null);
@@ -181,51 +209,64 @@ const Collaborate = () => {
 
   const renderSessionDetails = () => {
     if (!localSession) return null;
-    
+
     return (
       <div className="bg-slate-700/80 rounded-xl p-6 shadow-lg">
         <div className="mb-6">
-          <h3 className="text-xl font-bold text-white mb-2">{localSession.name}</h3>
+          <h3 className="text-xl font-bold text-white mb-2">
+            {localSession.name}
+          </h3>
           <div className="flex items-center space-x-3">
             <span className="bg-green-500/20 text-green-300 text-sm px-3 py-1 rounded-full flex items-center">
-              <FaLock className="mr-1" size={12} /> Session Code: {localSession.id}
+              <FaLock className="mr-1" size={12} /> Session Code:{" "}
+              {localSession.id}
             </span>
-            <button 
-              onClick={copySessionCode} 
+            <button
+              onClick={copySessionCode}
               className="bg-slate-600 hover:bg-slate-500 text-white text-sm px-3 py-1 rounded-full flex items-center transition duration-200"
             >
-              {copiedToClipboard ? <FaCheck className="mr-1" size={12} /> : <FaCopy className="mr-1" size={12} />}
+              {copiedToClipboard ? (
+                <FaCheck className="mr-1" size={12} />
+              ) : (
+                <FaCopy className="mr-1" size={12} />
+              )}
               {copiedToClipboard ? "Copied!" : "Copy Code"}
             </button>
           </div>
         </div>
-        
+
         <div className="mb-6">
-          <h4 className="text-lg font-medium text-white mb-3">Participants ({localSession.participants.length})</h4>
+          <h4 className="text-lg font-medium text-white mb-3">
+            Participants ({localSession.participants.length})
+          </h4>
           <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
-            {localSession.participants.map(participant => (
-              <div key={participant.id} className="flex items-center bg-slate-800 rounded-lg p-3">
+            {localSession.participants.map((participant) => (
+              <div
+                key={participant.id}
+                className="flex items-center bg-slate-800 rounded-lg p-3"
+              >
                 <FaUserCircle className="text-amber-400 mr-3" size={24} />
                 <div>
                   <p className="text-white font-medium">{participant.name}</p>
                   <p className="text-gray-400 text-sm">
-                    {participant.isHost ? "Host" : "Participant"} • Joined {new Date(participant.joinedAt).toLocaleTimeString()}
+                    {participant.isHost ? "Host" : "Participant"} • Joined{" "}
+                    {new Date(participant.joinedAt).toLocaleTimeString()}
                   </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        
+
         <div className="flex space-x-4">
-          <a 
-            href="/question-type" 
+          <a
+            href="/question-type"
             className="flex-1 bg-amber-400 hover:bg-amber-300 text-slate-900 font-medium py-3 rounded-lg flex items-center justify-center transition duration-200"
           >
             <FaPlus className="mr-2" /> Create Quiz Together
           </a>
-          <button 
-            onClick={exitSession} 
+          <button
+            onClick={exitSession}
             className="bg-slate-600 hover:bg-red-500/80 text-white font-medium py-3 px-6 rounded-lg transition duration-200"
           >
             Exit Session
@@ -238,14 +279,16 @@ const Collaborate = () => {
   return (
     <div className="w-screen min-h-screen bg-slate-800 overflow-x-hidden">
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-slate-700/40 to-slate-900 opacity-70 fixed"></div>
-      
+
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <a href="/" className="text-gray-400 hover:text-amber-400 flex items-center">
+          <a
+            href="/"
+            className="text-gray-400 hover:text-amber-400 flex items-center"
+          >
             <FaArrowLeft className="mr-2" /> Back
           </a>
-          
           <div className="text-3xl text-center font-bold">
             <span className="bg-gradient-to-r from-amber-400 to-amber-300 text-transparent bg-clip-text">
               Inquiz
@@ -254,17 +297,18 @@ const Collaborate = () => {
               zitive
             </span>
           </div>
-          
           <div className="w-20"></div> {/* Empty div for flexbox alignment */}
         </div>
-        
+
         {/* Main Content */}
         <div className="bg-slate-700/50 rounded-2xl p-6 shadow-lg">
           <div className="flex items-center mb-6">
             <FaUsers className="text-amber-400 mr-3" size={24} />
-            <h2 className="text-2xl font-bold text-white">Collaborative Quiz Mode</h2>
+            <h2 className="text-2xl font-bold text-white">
+              Collaborative Quiz Mode
+            </h2>
           </div>
-          
+
           {localSession ? (
             // Already in a session, show session details
             renderSessionDetails()
@@ -293,13 +337,13 @@ const Collaborate = () => {
                   Join Session
                 </button>
               </div>
-              
+
               {errorMessage && (
                 <div className="bg-red-500/20 border border-red-500/40 text-red-300 rounded-lg p-3 mb-6">
                   {errorMessage}
                 </div>
               )}
-              
+
               {activeTab === "create" ? (
                 <>
                   {sessionCreated ? (
@@ -309,7 +353,9 @@ const Collaborate = () => {
                     // Show create session form
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-gray-300 mb-2">Session Name</label>
+                        <label className="block text-gray-300 mb-2">
+                          Session Name
+                        </label>
                         <input
                           type="text"
                           value={sessionName}
@@ -318,9 +364,11 @@ const Collaborate = () => {
                           className="w-full bg-slate-800 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-400"
                         />
                       </div>
-                      
+
                       <div>
-                        <label className="block text-gray-300 mb-2">Your Display Name</label>
+                        <label className="block text-gray-300 mb-2">
+                          Your Display Name
+                        </label>
                         <input
                           type="text"
                           value={displayName}
@@ -329,7 +377,7 @@ const Collaborate = () => {
                           className="w-full bg-slate-800 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-400"
                         />
                       </div>
-                      
+
                       <button
                         onClick={handleCreateSession}
                         disabled={isCreatingSession}
@@ -351,7 +399,9 @@ const Collaborate = () => {
                 // Join session form
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-gray-300 mb-2">Session Code</label>
+                    <label className="block text-gray-300 mb-2">
+                      Session Code
+                    </label>
                     <input
                       type="text"
                       value={joinCode}
@@ -363,9 +413,11 @@ const Collaborate = () => {
                       Try code "DEMO12" for a demo session
                     </p>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-gray-300 mb-2">Your Display Name</label>
+                    <label className="block text-gray-300 mb-2">
+                      Your Display Name
+                    </label>
                     <input
                       type="text"
                       value={displayName}
@@ -374,7 +426,7 @@ const Collaborate = () => {
                       className="w-full bg-slate-800 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-400"
                     />
                   </div>
-                  
+
                   <button
                     onClick={handleJoinSession}
                     disabled={isJoiningSession}
@@ -394,20 +446,26 @@ const Collaborate = () => {
             </>
           )}
         </div>
-        
+
         {/* Features Section */}
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-slate-700/50 p-5 rounded-xl">
-            <h3 className="text-amber-400 font-bold text-lg mb-2">Create Together</h3>
+            <h3 className="text-amber-400 font-bold text-lg mb-2">
+              Create Together
+            </h3>
             <p className="text-gray-300">
-              Collaborate in real-time with classmates or colleagues to create quizzes as a team.
+              Collaborate in real-time with classmates or colleagues to create
+              quizzes as a team.
             </p>
           </div>
-          
+
           <div className="bg-slate-700/50 p-5 rounded-xl">
-            <h3 className="text-amber-400 font-bold text-lg mb-2">Shared Results</h3>
+            <h3 className="text-amber-400 font-bold text-lg mb-2">
+              Shared Results
+            </h3>
             <p className="text-gray-300">
-              View analytics and export quizzes to Google Forms or PDF together with your group.
+              View analytics and export quizzes to Google Forms or PDF together
+              with your group.
             </p>
           </div>
         </div>
@@ -416,4 +474,4 @@ const Collaborate = () => {
   );
 };
 
-export default Collaborate; 
+export default Collaborate;

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { FaArrowLeft, FaYoutube, FaSearch, FaSpinner } from "react-icons/fa";
+import { FaArrowLeft, FaYoutube, FaSearch, FaSpinner, FaGlobe } from "react-icons/fa";
 import "../index.css";
+import FloatingObjects from "../components/FloatingObjects";
 
 const YouTubeQuiz = () => {
   const [videoUrl, setVideoUrl] = useState("");
@@ -13,6 +14,45 @@ const YouTubeQuiz = () => {
   const [difficulty, setDifficulty] = useState("Easy Difficulty");
   const [questionType, setQuestionType] = useState("mcq");
   const [step, setStep] = useState(1); // 1 = Enter URL, 2 = Preview & Settings, 3 = Processing
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [languageCode, setLanguageCode] = useState("en");
+  const [isCheckingVideo, setIsCheckingVideo] = useState(false);
+  const [subtitleInfo, setSubtitleInfo] = useState(null);
+
+  // Common language options
+  const languageOptions = [
+    { code: "en", name: "English" },
+    { code: "es", name: "Spanish" },
+    { code: "fr", name: "French" },
+    { code: "de", name: "German" },
+    { code: "it", name: "Italian" },
+    { code: "pt", name: "Portuguese" },
+    { code: "ru", name: "Russian" },
+    { code: "ja", name: "Japanese" },
+    { code: "ko", name: "Korean" },
+    { code: "zh-CN", name: "Chinese (Simplified)" },
+    { code: "hi", name: "Hindi" },
+    { code: "ar", name: "Arabic" }
+  ];
+
+  // Sample videos known to have good captions
+  const sampleVideos = [
+    {
+      title: "Khan Academy Math",
+      url: "https://www.youtube.com/watch?v=NcoPn5j0owl",
+      description: "Algebra basics"
+    },
+    {
+      title: "Crash Course Computer Science",
+      url: "https://www.youtube.com/watch?v=O5nskjZ_GoI",
+      description: "Computer science basics"
+    },
+    {
+      title: "TED-Ed History",
+      url: "https://www.youtube.com/watch?v=fBq3nwQ_-TE",
+      description: "History of the world"
+    }
+  ];
 
   // Extract YouTube video ID from URL
   const extractVideoId = (url) => {
@@ -38,36 +78,23 @@ const YouTubeQuiz = () => {
     });
   };
 
-  // Mock function to fetch video transcript
-  const fetchTranscript = async (videoId) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Sample transcript text
-        const transcripts = [
-          `Neural networks are a series of algorithms that mimic the operations of a human brain to recognize relationships between vast amounts of data. They are a form of machine learning that uses interconnected nodes or neurons in a layered structure resembling the human brain. 
-          
-          A neural network contains layers of interconnected nodes. Each node is a perceptron and is similar to a multiple linear regression. The perceptron feeds the signal produced by a multiple linear regression into an activation function that may be nonlinear.
-          
-          In a simple neural network, there are three types of layers: the input layer, hidden layers, and the output layer. The input layer receives the input data, the hidden layers process the data, and the output layer produces the result.`,
-          
-          `Computer vision is a field of artificial intelligence that trains computers to interpret and understand the visual world. Using digital images from cameras and videos and deep learning models, machines can accurately identify and classify objects and then react to what they "see."
-          
-          The field of computer vision has made tremendous advances in recent years through the use of convolutional neural networks (CNNs). CNNs are designed to automatically and adaptively learn spatial hierarchies of features from images.
-          
-          Some common applications of computer vision include image classification, object detection, image segmentation, and facial recognition. These technologies are now embedded in everything from autonomous vehicles to medical diagnostics.`,
-
-          `Natural Language Processing (NLP) is a subfield of linguistics, computer science, and artificial intelligence concerned with the interactions between computers and human language, in particular how to program computers to process and analyze large amounts of natural language data.
-          
-          The goal of NLP is to develop techniques that allow computers to understand and generate human language in a way that is both meaningful and useful. This includes tasks such as language translation, sentiment analysis, speech recognition, and text summarization.
-          
-          Modern NLP systems use deep learning approaches, particularly transformer-based models like BERT and GPT, which have revolutionized the field by allowing for more nuanced language understanding and generation.`
-        ];
-        
-        // Randomly select one transcript
-        const randomIndex = Math.floor(Math.random() * transcripts.length);
-        resolve(transcripts[randomIndex]);
-      }, 2000);
-    });
+  // Fetch video transcript from the backend API with language support
+  const fetchTranscript = async (videoId, langCode = "en") => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/getTranscript?videoId=${videoId}&lang=${langCode}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch transcript");
+      }
+      const data = await response.json();
+      if (data.transcript) {
+        return data.transcript;
+      } else {
+        throw new Error(data.error || "No transcript available");
+      }
+    } catch (error) {
+      console.error("Error fetching transcript:", error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -84,15 +111,27 @@ const YouTubeQuiz = () => {
     setVideoId(extractedId);
     
     try {
-      // In a real implementation, these would be actual API calls
+      // Get video info first
       const info = await fetchVideoInfo(extractedId);
       setVideoInfo(info);
       
-      const text = await fetchTranscript(extractedId);
-      setTranscript(text);
-      
-      // Move to next step
-      setStep(2);
+      try {
+        // Then try to get the transcript with selected language
+        const text = await fetchTranscript(extractedId, languageCode);
+        setTranscript(text);
+        
+        // Move to next step
+        setStep(2);
+      } catch (transcriptError) {
+        console.error("Transcript error:", transcriptError);
+        setErrorMessage(
+          "Failed to retrieve video transcript. This could be because:\n" +
+          "- The video doesn't have captions/subtitles\n" +
+          "- The captions are not in a supported format\n" +
+          "- The selected language is not available for this video\n" +
+          "Please try another video with captions enabled or try a different language."
+        );
+      }
     } catch (error) {
       console.error("Error fetching video data:", error);
       setErrorMessage("Failed to retrieve video information. Please try another video.");
@@ -132,12 +171,104 @@ const YouTubeQuiz = () => {
     }, 2000);
   };
 
+  const tryExampleVideo = (url) => {
+    setVideoUrl(url);
+    // Automatically submit the form with the selected URL
+    const extractedId = extractVideoId(url);
+    if (extractedId) {
+      setVideoId(extractedId);
+      setIsLoading(true);
+      
+      // Use the same process as handleSubmit but without the event
+      (async () => {
+        try {
+          const info = await fetchVideoInfo(extractedId);
+          setVideoInfo(info);
+          
+          try {
+            const text = await fetchTranscript(extractedId, languageCode);
+            setTranscript(text);
+            setStep(2);
+          } catch (error) {
+            setErrorMessage(
+              "Failed to retrieve video transcript. This could be because:\n" +
+              "- The video doesn't have captions/subtitles\n" +
+              "- The captions are not in a supported format\n" +
+              "- The selected language is not available for this video\n" +
+              "Please try another video with captions enabled or try a different language."
+            );
+          }
+        } catch (error) {
+          setErrorMessage("Failed to retrieve video information. Please try another video.");
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }
+  };
+
   // Format seconds to MM:SS
   const formatDuration = (duration) => {
     if (!duration) return "--:--";
     
     // Sample format: "15:42"
     return duration;
+  };
+
+  // Filter multi-line error messages for better display
+  const formatErrorMessage = (message) => {
+    if (!message) return "";
+    
+    // Convert newlines to HTML line breaks
+    return message.split('\n').map((line, index) => (
+      <React.Fragment key={index}>
+        {line}
+        {index < message.split('\n').length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
+
+  // Check if a video has available subtitles
+  const checkVideoSubtitles = async () => {
+    if (!videoUrl) {
+      setErrorMessage("Please enter a YouTube URL first");
+      return;
+    }
+    
+    const extractedId = extractVideoId(videoUrl);
+    if (!extractedId) {
+      setErrorMessage("Invalid YouTube URL. Please enter a valid YouTube video link.");
+      return;
+    }
+    
+    setIsCheckingVideo(true);
+    
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/debugSubtitles?videoId=${extractedId}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to check video subtitles");
+      }
+      
+      const data = await response.json();
+      setSubtitleInfo(data);
+      
+      // Check if the video has subtitles
+      const hasSubtitles = data.available_subtitles && 
+        (data.available_subtitles.length > 0) && 
+        !data.available_subtitles.some(sub => sub.message && sub.message.includes("has no"));
+      
+      if (hasSubtitles) {
+        setErrorMessage("");
+      } else {
+        setErrorMessage("This video does not appear to have any subtitles/captions available. Please try another video.");
+      }
+    } catch (error) {
+      console.error("Error checking video subtitles:", error);
+      setErrorMessage("Failed to check video subtitles. Please try again.");
+    } finally {
+      setIsCheckingVideo(false);
+    }
   };
 
   // Render step 1: Enter YouTube URL
@@ -147,7 +278,7 @@ const YouTubeQuiz = () => {
       
       {errorMessage && (
         <div className="bg-red-500/20 border border-red-500/40 text-red-300 rounded-lg p-3 mb-6">
-          {errorMessage}
+          {formatErrorMessage(errorMessage)}
         </div>
       )}
       
@@ -169,15 +300,101 @@ const YouTubeQuiz = () => {
             {isLoading ? <FaSpinner className="animate-spin" /> : <FaSearch />}
           </button>
         </div>
+
+        <div className="mt-4 flex items-center space-x-3">
+          <button 
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-gray-300 text-sm hover:text-amber-400 flex items-center"
+          >
+            <FaGlobe className="mr-2" />
+            {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
+          </button>
+
+          <button
+            type="button"
+            onClick={checkVideoSubtitles}
+            disabled={isCheckingVideo}
+            className="text-gray-300 text-sm hover:text-green-400 flex items-center"
+          >
+            {isCheckingVideo ? <FaSpinner className="animate-spin mr-2" /> : <FaYoutube className="mr-2" />}
+            Check Video
+          </button>
+        </div>
+
+        {showAdvanced && (
+          <div className="mt-3 bg-slate-800 rounded-lg p-4 border border-slate-600">
+            <label className="block text-gray-300 mb-2 text-sm">Caption Language</label>
+            <select
+              value={languageCode}
+              onChange={(e) => setLanguageCode(e.target.value)}
+              className="w-full bg-slate-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            >
+              {languageOptions.map(lang => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-gray-400 text-xs mt-2">
+              If English captions aren't available, try selecting a different language.
+              Not all videos have captions in all languages.
+            </p>
+          </div>
+        )}
+
+        {subtitleInfo && (
+          <div className="mt-3 bg-green-400/10 border border-green-400/30 rounded-lg p-3 text-xs text-green-300 max-h-36 overflow-y-auto">
+            <p className="font-medium">{subtitleInfo.video_title || 'Unknown title'}</p>
+            <p className="mt-1 mb-2">Available subtitles:</p>
+            <ul className="list-disc pl-5">
+              {subtitleInfo.available_subtitles && subtitleInfo.available_subtitles.length > 0 ? (
+                subtitleInfo.available_subtitles.map((sub, idx) => (
+                  <li key={idx}>
+                    {sub.language ? `${sub.language} (${sub.formats?.join(', ')})` : sub.message}
+                  </li>
+                ))
+              ) : (
+                <li>No subtitles available</li>
+              )}
+            </ul>
+          </div>
+        )}
       </form>
       
-      <div className="flex items-center">
+      <div className="mb-6">
+        <h3 className="text-gray-300 text-sm mb-2">Try Example Videos:</h3>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {sampleVideos.map((video, index) => (
+            <button
+              key={index}
+              onClick={() => tryExampleVideo(video.url)}
+              className="bg-slate-800 hover:bg-slate-700 text-white text-sm p-2 rounded border border-slate-600 transition duration-200"
+            >
+              <div className="font-medium">{video.title}</div>
+              <div className="text-gray-400 text-xs mt-1">{video.description}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      <div className="flex items-center mb-4">
         <div className="bg-red-500/20 p-2 rounded-full mr-3">
           <FaYoutube className="text-red-500" size={24} />
         </div>
         <p className="text-gray-300">
           Enter a YouTube video URL to automatically extract its transcript and generate quiz questions.
         </p>
+      </div>
+      
+      <div className="bg-amber-400/10 border border-amber-400/30 rounded-lg p-3 text-sm text-amber-200">
+        <p className="font-medium mb-1">Best practices for video selection:</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Select videos with clear narration and good audio quality</li>
+          <li>Educational videos from channels like Khan Academy, Crash Course, and TED-Ed work well</li>
+          <li>Verify that the video has English captions (either auto-generated or manual)</li>
+          <li>Try shorter videos (5-15 minutes) for more focused quiz questions</li>
+        </ul>
       </div>
     </div>
   );
@@ -289,6 +506,7 @@ const YouTubeQuiz = () => {
 
   return (
     <div className="w-screen min-h-screen bg-slate-800 overflow-x-hidden">
+      <FloatingObjects />
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-slate-700/40 to-slate-900 opacity-70 fixed"></div>
       
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-8">
@@ -336,6 +554,11 @@ const YouTubeQuiz = () => {
                 <span>Share, export, or save your quiz for later use</span>
               </li>
             </ol>
+            
+            <div className="mt-4 bg-slate-800 rounded-lg p-4 text-yellow-300 text-sm">
+              <p className="font-medium mb-1">Important Note:</p>
+              <p>This feature uses the actual transcript/captions from the YouTube video to generate questions. The video must have captions available (either auto-generated or manually added) for this to work. Questions will be based directly on the content spoken in the video.</p>
+            </div>
           </div>
         )}
       </div>

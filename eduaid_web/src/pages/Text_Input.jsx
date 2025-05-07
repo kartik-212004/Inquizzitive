@@ -150,6 +150,13 @@ const Text_Input = () => {
         const responseData = await response.json();
         localStorage.setItem("qaPairs", JSON.stringify(responseData));
 
+        // Store validation message if it exists
+        if (responseData.validation_message) {
+          localStorage.setItem("validationMessage", responseData.validation_message);
+        } else {
+          localStorage.removeItem("validationMessage");
+        }
+
         // Create a quiz details object
         const quizDetails = {
           title: `Quiz ${new Date().toLocaleString()}`,
@@ -370,6 +377,13 @@ const Text_Input = () => {
               </label>
             </div>
           </div>
+          
+          {/* Wikipedia explanation */}
+          {isToggleOn && (
+            <div className="mt-3 bg-amber-400/10 border border-amber-400/30 rounded-lg p-3 text-sm text-amber-200">
+              <p><strong>Wikipedia mode is ON:</strong> The system will search Wikipedia for your input topic and use that content to generate questions. This works best with simple, concise topic names (e.g., "Neural Networks", "Climate Change").</p>
+            </div>
+          )}
         </div>
         
         {/* Submit Button */}
