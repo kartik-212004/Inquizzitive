@@ -52,13 +52,15 @@ const Home = () => {
     <div className="popup w-screen h-screen bg-[#02000F] flex justify-center items-center">
       <div className="w-full h-full bg-cust bg-opacity-50 bg-custom-gradient">
         <div>
-          <img src="aossie_transparent.png" alt="logo" className="w-24 my-6 mx-6 block" />
+          <div
+            className="w-24 my-6 mx-6 block"
+          />
           <div className="text-7xl text-center font-extrabold">
             <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-              Edu
+              Inquiz
             </span>
             <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-              Aid
+              zitive
             </span>
           </div>
           <div className="text-white text-[1.5rem] text-center my-4">

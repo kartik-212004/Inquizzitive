@@ -217,7 +217,7 @@ def generate_gform():
     )
     NEW_FORM = {
         "info": {
-            "title": "EduAid form",
+            "title": "Inquizzitive form",
         }
     }
     requests_list = []

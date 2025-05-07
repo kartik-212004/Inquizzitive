@@ -33,10 +33,10 @@ function Home() {
           <img src={logo} alt="logo" className="w-16 my-4 ml-4 block" />
           <div className="text-2xl mb-3 font-extrabold">
             <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-              Edu
+            Inquiz
             </span>
             <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-              Aid
+            zitive
             </span>
           </div>
           

@@ -156,7 +156,7 @@ const Output = () => {
           height: logoDims.height,
         });
         // Adjust title position to be next to the logo
-        page.drawText('EduAid generated Quiz', {
+        page.drawText('Inquizzitive generated Quiz', {
           x: margin + logoDims.width + 10,
           y: pageHeight - margin,
           size: 20
@@ -169,7 +169,7 @@ const Output = () => {
       } catch (error) {
         console.error('Error embedding logo:', error);
         // Fallback to text-only header if logo embedding fails
-        page.drawText('EduAid generated Quiz', {
+        page.drawText('Inquizzitive generated Quiz', {
           x: margin,
           y: pageHeight - margin,
           size: 20

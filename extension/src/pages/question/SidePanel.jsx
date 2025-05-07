@@ -126,7 +126,7 @@ function SidePanel() {
     const pdfDoc = await PDFDocument.create();
     let page = pdfDoc.addPage();
     const d = new Date(Date.now());
-    page.drawText('EduAid generated Quiz', { x: 50, y: 800, size: 20 });
+    page.drawText('Inquizzitive generated Quiz', { x: 50, y: 800, size: 20 });
     page.drawText('Created On: ' + d.toString(), { x: 50, y: 770, size: 10 });
     const form = pdfDoc.getForm();
     let y = 700; // Starting y position for content
@@ -211,10 +211,10 @@ function SidePanel() {
             <img src={logo} alt="logo" className="w-16 my-4 ml-4 block" />
             <div className="text-2xl mb-3 font-extrabold">
               <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-                Edu
+                Inquiz
               </span>
               <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-                Aid
+                zitive
               </span>
             </div>
           </div>

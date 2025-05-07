@@ -24,7 +24,6 @@ extension/dist
 extension/node_modules
 backend/credentials.json
 backend/token.json
-backend/service_account_key.json
 venv
-backend/Eduaid
+backend/Inquizzitive
 .DS_Store

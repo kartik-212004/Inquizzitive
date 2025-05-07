@@ -1,8 +1,8 @@
-# EduAid: AI Quiz Generation 🚀
+# Inquizzitive: AI Quiz Generation 🚀
 
 Online learning has taken the front seat in the post-pandemic age. With the advent of sophisticated AI architectures like Transformers, it is only natural that AI would find its way into education. Learning online via platforms like YouTube or MOOCs is often a method of self-learning. The biggest obstacle faced by students in self-learning is the lack of attention span. An online tool that can generate short quizzes from input educational content can be a great resource for both teachers and students. It helps retain important information, frame questions, and quickly revise large chunks of content.
 
-EduAid is one such project currently available in the form of a browser extension.
+Inquizzitive is one such project currently available in the form of a browser extension.
 
 ## Installation and Setup
 
@@ -87,8 +87,8 @@ npm run build
 2. Enable "Developer mode" (top-right corner).
 3. Click on "Load Unpacked" and select the `dist` folder created in the previous step.
 
-#### EduAid Web App
-In addition to the browser extension, EduAid also offers a web app that provides the same powerful features for quiz generation. The web app allows you to access EduAid's capabilities directly from your browser without needing to install any extensions. Just start the backend server locally and:
+#### Inquizzitive Web App
+In addition to the browser extension, Inquizzitive also offers a web app that provides the same powerful features for quiz generation. The web app allows you to access Inquizzitive's capabilities directly from your browser without needing to install any extensions. Just start the backend server locally and:
 
 1. Navigate to the Web App Directory:
 `cd eduaid_web`
