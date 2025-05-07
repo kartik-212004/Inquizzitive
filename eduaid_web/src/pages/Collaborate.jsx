@@ -97,6 +97,7 @@ const Collaborate = () => {
             {
               id: sessionData.id,
               name: sessionData.name,
+              createdBy: displayName,
               createdAt: sessionData.createdAt,
             },
           ])
@@ -137,8 +138,49 @@ const Collaborate = () => {
       // In a real implementation, this would check if the session exists on the server
       // For now, we'll simulate checking for an existing session
       setTimeout(() => {
-        // This is just for demo/hackathon purposes
-        // In a real app, we would verify this code against a database
+        // First, check if the session exists in stored sessions list
+        const storedSessionsList = JSON.parse(localStorage.getItem("collaborativeSessionsList")) || [];
+        const foundSession = storedSessionsList.find(session => session.id === joinCode.toUpperCase());
+        
+        // If the session exists in our stored list, recreate it for this tab
+        if (foundSession) {
+          // Create a full session object with the participant added
+          const sessionData = {
+            id: foundSession.id,
+            name: foundSession.name,
+            createdBy: foundSession.createdBy || "Unknown Host",
+            createdAt: foundSession.createdAt,
+            participants: [
+              // Include original host (estimated data since we don't store full participant details in the list)
+              {
+                id: "host-" + Math.random().toString(36).substring(2, 9),
+                name: foundSession.createdBy || "Unknown Host",
+                isHost: true,
+                joinedAt: new Date(foundSession.createdAt).toISOString(),
+              },
+              // Add the current user
+              {
+                id: "user-" + Math.random().toString(36).substring(2, 9),
+                name: displayName,
+                isHost: false,
+                joinedAt: new Date().toISOString(),
+              }
+            ],
+            quizzes: [],
+          };
+
+          localStorage.setItem(
+            "currentCollaborativeSession",
+            JSON.stringify(sessionData)
+          );
+          localStorage.setItem("collaborateUserName", displayName);
+
+          setLocalSession(sessionData);
+          setParticipants(sessionData.participants);
+          setSessionCreated(true);
+          setIsJoiningSession(false);
+          return;
+        }
 
         // Create a simulated session if the user entered the "demo" code
         if (joinCode.toUpperCase() === "DEMO12") {
