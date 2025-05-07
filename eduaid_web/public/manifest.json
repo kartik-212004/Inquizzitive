@@ -3,17 +3,17 @@
   "name": "Inquizzitive : AI Quiz Generator",
   "icons": [
     {
-      "src": "aossie_logo64.ico",
+      "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "aossie_logo.png",
+      "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "aossie_logo.png",
+      "src": "logo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }

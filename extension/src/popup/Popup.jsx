@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import "../index.css";
-import logo from "../assets/aossie_logo.webp";
 import starsImg from "../assets/stars.png";
 import arrow from "../assets/arrow.png";
 import gitStar from "../assets/gitStar.png";
@@ -51,13 +50,12 @@ function Popup() {
     <div className="popup w-screen h-screen bg-[#02000F] flex justify-center items-center">
       <div className="w-full h-full bg-cust bg-opacity-50 bg-custom-gradient">
         <div>
-          <img src={logo} alt="logo" className="w-16 my-4 mx-4 block" />
-          <div className="text-5xl text-center font-extrabold">
+          <div className="text-5xl text-center font-extrabold mt-6">
             <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-              Edu
+              Inquiz
             </span>
             <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-              Aid
+              zitive
             </span>
           </div>
           <div className="text-white text-[1rem] text-center my-2">
@@ -93,7 +91,7 @@ function Popup() {
             <div className="mt-6 rounded-2xl mr-4">
               <a href="/src/pages/home/home.html">
                 <button className="bg-black items-center text-base flex justify-center gap-2 text-white px-4 py-2 mx-auto mt-4 border-gradient hover:wave-effect rounded-md">
-                  Let’s get Started{" "}
+                  Let's get Started{" "}
                   <img src={arrow} width={20} height={18} alt="" />
                 </button>
               </a>

@@ -14,14 +14,14 @@
     "http://127.0.0.1:8000/*"
   ],
   "icons": {
-    "16": "aossie_logo16.png"
+    "16": "logo16.png"
   },
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icon": {
-      "16": "aossie_logo16.png",
-      "32": "aossie_logo32.png",
-      "64": "aossie_logo64.png"
+      "16": "logo16.png",
+      "32": "logo32.png",
+      "64": "logo64.png"
     }
   },
   "web_accessible_resources": [

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "../index.css";
-import logo from "../assets/aossie_logo.png";
 import starsImg from "../assets/stars.png";
 import arrow from "../assets/arrow.png";
 import gitStar from "../assets/gitStar.png";
@@ -96,7 +95,7 @@ const Home = () => {
             <div className="mt-8 rounded-2xl">
               <a href="question-type">
                 <button className="items-center text-lg flex justify-center gap-4 text-white px-6 py-3 mx-auto mt-6 border-gradient hover:wave-effect rounded-md">
-                  Let’s get Started{" "}
+                  Let's get Started{" "}
                   <img src={arrow} width={28} height={24} alt="" />
                 </button>
               </a>

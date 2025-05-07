@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { PDFDocument, rgb } from 'pdf-lib';
 import "../../index.css";
-import logo from "../../assets/aossie_logo.webp";
-import logoPNG from "../../assets/aossie_logo.png";
 
 function Question() {
   const [qaPairs, setQaPairs] = useState([]);
@@ -63,7 +61,7 @@ function Question() {
         });
       }
 
-      if (qaPairsFromStorage["output_mcq"] || questionType === "get_mcq") {
+      if ((qaPairsFromStorage["output_mcq"] || questionType === "get_mcq") && qaPairsFromStorage["output"]) {
         qaPairsFromStorage["output"].forEach((qaPair) => {
           combinedQaPairs.push({
             question: qaPair.question_statement,
@@ -75,7 +73,7 @@ function Question() {
         });
       }
 
-      if (questionType == "get_boolq") {
+      if (questionType == "get_boolq" && qaPairsFromStorage["output"]) {
         qaPairsFromStorage["output"].forEach((qaPair) => {
           combinedQaPairs.push({
             question: qaPair,
@@ -121,14 +119,7 @@ function Question() {
   };
 
   const loadLogoAsBytes = async () => {
-    try {
-      const response = await fetch(logoPNG);
-      const arrayBuffer = await response.arrayBuffer();
-      return new Uint8Array(arrayBuffer);
-    } catch (error) {
-      console.error('Error loading logo:', error);
-      return null;
-    }
+    return null;
   };
 
   const generatePDF = async (mode) => {
@@ -147,28 +138,20 @@ function Question() {
     let logoImage;
     if (logoBytes) {
       try {
-        logoImage = await pdfDoc.embedPng(logoBytes);
-        const logoDims = logoImage.scale(0.2); // Scale down the logo
-        page.drawImage(logoImage, {
-          x: margin,
-          y: pageHeight - margin - 30,
-          width: logoDims.width,
-          height: logoDims.height,
-        });
-        // Adjust title position to be next to the logo
+        // Skip logo embedding code since we're not using it anymore
+        // Just draw the title text directly
         page.drawText('Inquizzitive generated Quiz', {
-          x: margin + logoDims.width + 10,
+          x: margin,
           y: pageHeight - margin,
           size: 20
         });
         page.drawText('Created On: ' + d.toString(), {
-          x: margin + logoDims.width + 10,
+          x: margin,
           y: pageHeight - margin - 30,
           size: 10
         });
       } catch (error) {
-        console.error('Error embedding logo:', error);
-        // Fallback to text-only header if logo embedding fails
+        console.error('Error with PDF generation:', error);
         page.drawText('Inquizzitive generated Quiz', {
           x: margin,
           y: pageHeight - margin,
@@ -180,6 +163,18 @@ function Question() {
           size: 10
         });
       }
+    } else {
+      // Fallback text header
+      page.drawText('Inquizzitive generated Quiz', {
+        x: margin,
+        y: pageHeight - margin,
+        size: 20
+      });
+      page.drawText('Created On: ' + d.toString(), {
+        x: margin,
+        y: pageHeight - margin - 30,
+        size: 10
+      });
     }
     
     
@@ -350,13 +345,12 @@ function Question() {
       <div className="w-full h-full bg-cust bg-opacity-50 bg-custom-gradient">
         <div className="flex flex-col h-full">
           <div className="flex items-end gap-[2px]">
-            <img src={logo} alt="logo" className="w-16 my-4 ml-4 block" />
-            <div className="text-2xl mb-3 font-extrabold">
+            <div className="text-3xl mb-3 font-extrabold ml-6 my-4">
               <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-                Edu
+                Inquiz
               </span>
               <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-                Aid
+                zitive
               </span>
             </div>
           </div>

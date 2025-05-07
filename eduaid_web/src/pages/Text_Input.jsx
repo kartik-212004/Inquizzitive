@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import "../index.css";
-import logo from "../assets/aossie_logo.png";
 import stars from "../assets/stars.png";
 import cloud from "../assets/cloud.png";
 import { FaClipboard } from "react-icons/fa";
@@ -175,13 +174,12 @@ const Text_Input = () => {
       >
         <a href="/">
           <div className="flex items-end gap-[2px]">
-            <img src={logo} alt="logo" className="w-24 my-6 ml-6 block" />
-            <div className="text-4xl mb-5 font-extrabold">
+            <div className="text-5xl mb-5 font-extrabold ml-6 my-6">
               <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-                Edu
+                Inquiz
               </span>
               <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-                Aid
+                zitive
               </span>
             </div>
           </div>

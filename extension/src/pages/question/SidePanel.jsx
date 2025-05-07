@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { PDFDocument } from 'pdf-lib';
 import "../../index.css";
-import logo from "../../assets/aossie_logo.webp";
 
 function SidePanel() {
   const [qaPairs, setQaPairs] = useState([]);
@@ -59,7 +58,7 @@ function SidePanel() {
         });
       }
 
-      if (questionType === "get_mcq") {
+      if (questionType === "get_mcq" && qaPairsFromStorage["output"]) {
         qaPairsFromStorage["output"].forEach((qaPair) => {
           const options = qaPair.answer
             .filter((ans) => !ans.correct)
@@ -77,7 +76,7 @@ function SidePanel() {
         });
       }
 
-      if (questionType == "get_boolq") {
+      if (questionType == "get_boolq" && qaPairsFromStorage["output"]) {
         qaPairsFromStorage["output"].forEach((qaPair) => {
           combinedQaPairs.push({
             question: qaPair,
@@ -208,8 +207,7 @@ function SidePanel() {
       <div className="w-full h-full bg-cust bg-opacity-50 bg-custom-gradient">
         <div className="flex flex-col h-full">
           <div className="flex items-end gap-[2px]">
-            <img src={logo} alt="logo" className="w-16 my-4 ml-4 block" />
-            <div className="text-2xl mb-3 font-extrabold">
+            <div className="text-3xl mb-3 font-extrabold ml-6 my-4">
               <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
                 Inquiz
               </span>

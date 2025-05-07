@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "../index.css";
-import logo from "../assets/aossie_logo.png";
 
 const Question_Type = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -20,19 +19,18 @@ const Question_Type = () => {
       <div className="w-full h-full bg-cust bg-opacity-50 bg-custom-gradient p-6">
         <a href="/">
           <div className="flex items-end gap-4">
-            <img src="aossie_transparent.png" alt="logo" className="w-24 my-6 block" />
-            <div className="text-5xl mb-5 font-extrabold">
+            <div className="text-6xl mb-5 font-extrabold ml-6 my-6">
               <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-                Edu
+                Inquiz
               </span>
               <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-                Aid
+                zitive
               </span>
             </div>
           </div>
         </a>
         <div className="text-4xl mt-6 text-white text-center font-extrabold">
-          What’s on your Mind?
+          What's on your Mind?
         </div>
         <div className="mt-2 text-white text-xl text-center font-medium">
           Choose one

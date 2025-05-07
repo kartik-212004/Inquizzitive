@@ -1,6 +1,5 @@
 import React from "react";
 import "../index.css";
-import logo from "../assets/aossie_logo.png";
 import stars from "../assets/stars.png";
 import { FaArrowRight } from "react-icons/fa";
 
@@ -31,13 +30,12 @@ const Previous = () => {
       <div className="w-full h-full bg-cust bg-opacity-50 bg-custom-gradient">
         <a href="/">
           <div className="flex items-end gap-[2px]">
-            <img src="Aossie_transparent.png" alt="logo" className="w-16 my-4 ml-4 block" />
-            <div className="text-2xl mb-3 font-extrabold">
+            <div className="text-4xl mb-3 font-extrabold ml-6 my-4">
               <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-                Edu
+                Inquiz
               </span>
               <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-                Aid
+                zitive
               </span>
             </div>
           </div>
