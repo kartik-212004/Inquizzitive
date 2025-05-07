@@ -2,11 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary-dark: #0f172a; /* slate-950 */
+  --secondary-dark: #1e293b; /* slate-800 */
+  --accent-amber: #fbbf24; /* amber-400 */
+  --accent-blue: #3b82f6; /* blue-500 */
+  --accent-purple: #a855f7; /* purple-500 */
+  --accent-red: #ef4444; /* red-500 */
+  --accent-green: #22c55e; /* green-500 */
+  --text-light: #f8fafc; /* slate-50 */
+  --text-muted: #94a3b8; /* slate-400 */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: #1e293b; /* same as bg-slate-800 */
+  background-color: var(--primary-dark);
+  color: var(--text-light);
   min-height: 100vh;
   width: 100%;
   position: relative;
@@ -25,26 +44,41 @@ body:before {
   width: 100%;
   height: 100%;
   z-index: -1;
-  background: radial-gradient(circle at center, rgba(51, 65, 85, 0.4) 0%, rgba(15, 23, 42, 1) 100%);
+  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 1) 100%);
+  animation: pulseGradient 15s ease infinite alternate;
 }
 
-/* Make sure any scrollable containers have proper overflow handling */
+@keyframes pulseGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Improved scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(248, 169, 62, 0.4);
+  background: rgba(15, 23, 42, 0.8);
   border-radius: 4px;
 }
 
+::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.5);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(248, 169, 62, 0.6);
+  background: rgba(251, 191, 36, 0.8);
 }
 
 /* Prevent horizontal overflow */
@@ -57,10 +91,107 @@ code {
     monospace;
 }
 
+/* Better gradient borders */
 .border-gradient {
-  border-width: 2px; 
-  border-style: solid;
-  border-image: linear-gradient(to right, #ff005c, #7600f2, #00cbe7);
-  border-image-slice: 1;
+  position: relative;
   border-radius: 2rem;
+  overflow: hidden;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 2rem;
+  background: linear-gradient(to right, var(--accent-purple), var(--accent-blue), var(--accent-amber));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Custom animations for use with Framer Motion */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(251, 191, 36, 0.4);
+  }
+}
+
+/* Glassmorphism styles */
+.glass {
+  background: rgba(30, 41, 59, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Improved focus styles */
+*:focus-visible {
+  outline: 2px solid var(--accent-amber);
+  outline-offset: 2px;
+  transition: outline-offset 0.2s ease;
+}
+
+/* Improved button styling */
+button, .btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+button::after, .btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+button:focus:not(:active)::after, .btn:focus:not(:active)::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(80, 80);
+    opacity: 0;
+  }
 }
