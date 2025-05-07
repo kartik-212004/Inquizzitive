@@ -54,12 +54,21 @@ def get_mcq():
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
-    max_questions = data.get("max_questions", 4)
+    max_questions = int(data.get("max_questions", 4))
     input_text = process_input_text(input_text, use_mediawiki)
+    
+    # Ensure we request enough keywords to generate the requested number of questions
+    # The identify_keywords function limits based on this parameter
     output = MCQGen.generate_mcq(
-        {"input_text": input_text, "max_questions": max_questions}
+        {"input_text": input_text, "max_questions": max_questions * 2}
     )
-    questions = output["questions"]
+    
+    questions = output.get("questions", [])
+    
+    # Limit to the requested number of questions if we got more
+    if len(questions) > max_questions:
+        questions = questions[:max_questions]
+    
     return jsonify({"output": questions})
 
 
@@ -68,12 +77,29 @@ def get_boolq():
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
-    max_questions = data.get("max_questions", 4)
+    max_questions = int(data.get("max_questions", 4))
     input_text = process_input_text(input_text, use_mediawiki)
-    output = BoolQGen.generate_boolq(
-        {"input_text": input_text, "max_questions": max_questions}
-    )
-    boolean_questions = output["Boolean_Questions"]
+    
+    # BoolQ generation might return fewer questions than requested
+    # Try multiple times with increasing limits until we get enough questions
+    attempt = 1
+    max_attempts = 3
+    multiplier = 3
+    
+    while attempt <= max_attempts:
+        output = BoolQGen.generate_boolq(
+            {"input_text": input_text, "max_questions": max_questions * multiplier * attempt}
+        )
+        
+        boolean_questions = output.get("Boolean_Questions", [])
+        
+        if len(boolean_questions) >= max_questions:
+            # We got enough questions, limit to the requested number
+            boolean_questions = boolean_questions[:max_questions]
+            break
+        
+        attempt += 1
+    
     return jsonify({"output": boolean_questions})
 
 
@@ -82,12 +108,20 @@ def get_shortq():
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
-    max_questions = data.get("max_questions", 4)
+    max_questions = int(data.get("max_questions", 4))
     input_text = process_input_text(input_text, use_mediawiki)
+    
+    # Ensure we request enough keywords to generate the requested number of questions
     output = ShortQGen.generate_shortq(
-        {"input_text": input_text, "max_questions": max_questions}
+        {"input_text": input_text, "max_questions": max_questions * 2}
     )
-    questions = output["questions"]
+    
+    questions = output.get("questions", [])
+    
+    # Limit to the requested number of questions if we got more
+    if len(questions) > max_questions:
+        questions = questions[:max_questions]
+    
     return jsonify({"output": questions})
 
 
@@ -96,19 +130,45 @@ def get_problems():
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
-    max_questions_mcq = data.get("max_questions_mcq", 4)
-    max_questions_boolq = data.get("max_questions_boolq", 4)
-    max_questions_shortq = data.get("max_questions_shortq", 4)
+    max_questions = int(data.get("max_questions", 4))
+    
+    # Distribute the requested questions across the three types
+    # Allocate at least one question per type
+    total_types = 3
+    min_per_type = 1
+    remaining = max(max_questions - (total_types * min_per_type), 0)
+    
+    # Distribute remaining questions evenly
+    questions_per_type = min_per_type + (remaining // total_types)
+    extra = remaining % total_types
+    
+    max_questions_mcq = questions_per_type + (1 if extra > 0 else 0)
+    max_questions_boolq = questions_per_type + (1 if extra > 1 else 0)
+    max_questions_shortq = questions_per_type + (1 if extra > 2 else 0)
+    
     input_text = process_input_text(input_text, use_mediawiki)
+    
+    # Request double the questions from each generator to ensure we get enough
     output1 = MCQGen.generate_mcq(
-        {"input_text": input_text, "max_questions": max_questions_mcq}
+        {"input_text": input_text, "max_questions": max_questions_mcq * 2}
     )
     output2 = BoolQGen.generate_boolq(
-        {"input_text": input_text, "max_questions": max_questions_boolq}
+        {"input_text": input_text, "max_questions": max_questions_boolq * 3}
     )
     output3 = ShortQGen.generate_shortq(
-        {"input_text": input_text, "max_questions": max_questions_shortq}
+        {"input_text": input_text, "max_questions": max_questions_shortq * 2}
     )
+    
+    # Limit each output to the requested number of questions
+    if output1.get("questions") and len(output1["questions"]) > max_questions_mcq:
+        output1["questions"] = output1["questions"][:max_questions_mcq]
+    
+    if output2.get("Boolean_Questions") and len(output2["Boolean_Questions"]) > max_questions_boolq:
+        output2["Boolean_Questions"] = output2["Boolean_Questions"][:max_questions_boolq]
+    
+    if output3.get("questions") and len(output3["questions"]) > max_questions_shortq:
+        output3["questions"] = output3["questions"][:max_questions_shortq]
+    
     return jsonify(
         {"output_mcq": output1, "output_boolq": output2, "output_shortq": output3}
     )
@@ -368,12 +428,15 @@ def get_shortq_hard():
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
-    input_text = process_input_text(input_text,use_mediawiki)
-    input_questions = data.get("input_question", [])
-    output = qg.generate(
-        article=input_text, num_questions=input_questions, answer_style="sentences"
+    max_questions = int(data.get("max_questions", 4))
+    input_text = process_input_text(input_text, use_mediawiki)
+    output = ShortQGen.generate_shortq(
+        {"input_text": input_text, "max_questions": max_questions * 2}
     )
-    return jsonify({"output": output})
+    questions = output.get("questions", [])
+    if len(questions) > max_questions:
+        questions = questions[:max_questions]
+    return jsonify({"output": questions})
 
 
 @app.route("/get_mcq_hard", methods=["POST"])
@@ -381,12 +444,15 @@ def get_mcq_hard():
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
-    input_text = process_input_text(input_text,use_mediawiki)
-    input_questions = data.get("input_question", [])
-    output = qg.generate(
-        article=input_text, num_questions=input_questions, answer_style="multiple_choice"
+    max_questions = int(data.get("max_questions", 4))
+    input_text = process_input_text(input_text, use_mediawiki)
+    output = MCQGen.generate_mcq(
+        {"input_text": input_text, "max_questions": max_questions * 2}
     )
-    return jsonify({"output": output})
+    questions = output.get("questions", [])
+    if len(questions) > max_questions:
+        questions = questions[:max_questions]
+    return jsonify({"output": questions})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

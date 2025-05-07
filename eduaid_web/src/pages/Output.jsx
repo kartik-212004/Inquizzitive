@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import "../index.css";
+import { FaArrowLeft, FaFilePdf, FaGoogle, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Output = () => {
   const [qaPairs, setQaPairs] = useState([]);
@@ -8,19 +9,23 @@ const Output = () => {
     localStorage.getItem("selectedQuestionType")
   );
   const [pdfMode, setPdfMode] = useState("questions");
+  const [expandedQuestions, setExpandedQuestions] = useState({});
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-        const dropdown = document.getElementById('pdfDropdown');
-        if (dropdown && !dropdown.contains(event.target) && 
-            !event.target.closest('button')) {
-            dropdown.classList.add('hidden');
-        }
+      const dropdown = document.getElementById("pdfDropdown");
+      if (
+        dropdown &&
+        !dropdown.contains(event.target) &&
+        !event.target.closest("button.dropdown-toggle")
+      ) {
+        dropdown.classList.add("hidden");
+      }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-}, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -29,6 +34,13 @@ const Output = () => {
     }
     return array;
   }
+
+  const toggleQuestion = (index) => {
+    setExpandedQuestions(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
   useEffect(() => {
     const qaPairsFromStorage =
@@ -126,56 +138,22 @@ const Output = () => {
     const pageHeight = 841.89;
     const margin = 50;
     const maxContentWidth = pageWidth - (2 * margin);
-    const maxContentHeight = pageHeight - (2 * margin);
     
     const pdfDoc = await PDFDocument.create();
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
     const d = new Date(Date.now());
 
-    // Load and embed logo
-    const logoBytes = await loadLogoAsBytes();
-    let logoImage;
-    if (logoBytes) {
-      try {
-        // Skip logo embedding code since we're not using it anymore
-        // Just draw the title text directly
-        page.drawText('Inquizzitive generated Quiz', {
-          x: margin,
-          y: pageHeight - margin,
-          size: 20
-        });
-        page.drawText('Created On: ' + d.toString(), {
-          x: margin,
-          y: pageHeight - margin - 30,
-          size: 10
-        });
-      } catch (error) {
-        console.error('Error with PDF generation:', error);
-        page.drawText('Inquizzitive generated Quiz', {
-          x: margin,
-          y: pageHeight - margin,
-          size: 20
-        });
-        page.drawText('Created On: ' + d.toString(), {
-          x: margin,
-          y: pageHeight - margin - 30,
-          size: 10
-        });
-      }
-    } else {
-      // Fallback text header
-      page.drawText('Inquizzitive generated Quiz', {
-        x: margin,
-        y: pageHeight - margin,
-        size: 20
-      });
-      page.drawText('Created On: ' + d.toString(), {
-        x: margin,
-        y: pageHeight - margin - 30,
-        size: 10
-      });
-    }
-    
+    // Title text
+    page.drawText('Inquizzitive generated Quiz', {
+      x: margin,
+      y: pageHeight - margin,
+      size: 20
+    });
+    page.drawText('Created On: ' + d.toString(), {
+      x: margin,
+      y: pageHeight - margin - 30,
+      size: 10
+    });
     
     const form = pdfDoc.getForm();
     let y = pageHeight - margin - 70;
@@ -197,9 +175,7 @@ const Output = () => {
   
       words.forEach(word => {
           const testLine = currentLine ? `${currentLine} ${word}` : word;
-  
-          // Adjust the multiplier to reflect a more realistic line width based on font size
-          const testWidth = testLine.length * 6; // Update the multiplier for better wrapping.
+          const testWidth = testLine.length * 6;
   
           if (testWidth > maxWidth) {
               lines.push(currentLine);
@@ -214,9 +190,8 @@ const Output = () => {
       }
   
       return lines;
-  };
+    };
   
-
     qaPairs.forEach((qaPair) => {
         let requiredHeight = 60;
         const questionLines = wrapText(qaPair.question, maxContentWidth);
@@ -242,8 +217,8 @@ const Output = () => {
         if (mode !== 'answers') {
           questionLines.forEach((line, lineIndex) => {
               const textToDraw = lineIndex === 0 
-                  ? `Q${questionIndex}) ${line}`  // First line includes question number
-                  : `        ${line}`;           // Subsequent lines are indented
+                  ? `Q${questionIndex}) ${line}`
+                  : `        ${line}`;
               page.drawText(textToDraw, {
                   x: margin,
                   y: y - (lineIndex * 20),
@@ -329,114 +304,162 @@ const Output = () => {
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = "generated_questions.pdf";
+    link.download = "inquizzitive_quiz.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     document.getElementById('pdfDropdown').classList.add('hidden');
-};
+  };
 
   return (
-    <div className="popup w-full h-full bg-[#02000F] flex justify-center items-center">
-      <div className="w-full h-full bg-cust bg-opacity-50 bg-custom-gradient">
-        <div className="flex flex-col h-full">
-          <a href="/">
-            <div className="flex items-end gap-[2px]">
-              <div className="text-4xl mb-3 font-extrabold ml-6 my-4">
-                <span className="bg-gradient-to-r from-[#FF005C] to-[#7600F2] text-transparent bg-clip-text">
-                  Inquiz
-                </span>
-                <span className="bg-gradient-to-r from-[#7600F2] to-[#00CBE7] text-transparent bg-clip-text">
-                  zitive
-                </span>
-              </div>
-            </div>
+    <div className="w-screen min-h-screen bg-slate-800 overflow-x-hidden">
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-slate-700/40 to-slate-900 opacity-70 fixed"></div>
+      
+      <div className="relative z-10 max-w-4xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <a href="/input" className="text-gray-400 hover:text-amber-400 flex items-center">
+            <FaArrowLeft className="mr-2" /> Back
           </a>
-          <div className="font-bold text-xl text-white mt-3 mx-2">
-            Generated Questions
+          
+          <div className="text-3xl text-center font-bold">
+            <span className="bg-gradient-to-r from-amber-400 to-amber-300 text-transparent bg-clip-text">
+              Inquiz
+            </span>
+            <span className="bg-gradient-to-r from-amber-300 to-white text-transparent bg-clip-text">
+              zitive
+            </span>
           </div>
-          <div className="flex-1 overflow-y-auto scrollbar-hide">
-            {qaPairs &&
-              qaPairs.map((qaPair, index) => {
-                const combinedOptions = qaPair.options
-                  ? [...qaPair.options, qaPair.answer]
-                  : [qaPair.answer];
-                const shuffledOptions = shuffleArray(combinedOptions);
-                return (
-                  <div
-                    key={index}
-                    className="px-2 bg-[#d9d9d90d] border-black border my-1 mx-2 rounded-xl py-2"
-                  >
-                    <div className="text-[#E4E4E4] text-sm">
-                      Question {index + 1}
-                    </div>
-                    <div className="text-[#FFF4F4] text-[1rem] my-1">
+          
+          <div className="w-20"></div> {/* Empty div for flexbox alignment */}
+        </div>
+        
+        {/* Main Content Title */}
+        <div className="text-center mb-8">
+          <h2 className="text-white text-2xl font-medium mb-2">Generated Quiz</h2>
+          <p className="text-gray-300 text-lg">
+            {qaPairs.length} {qaPairs.length === 1 ? 'question' : 'questions'} created
+          </p>
+        </div>
+        
+        {/* Questions List */}
+        <div className="space-y-4 mb-10">
+          {qaPairs.map((qaPair, index) => {
+            const combinedOptions = qaPair.options
+              ? [...qaPair.options, qaPair.answer]
+              : [qaPair.answer];
+            const shuffledOptions = shuffleArray(combinedOptions);
+            
+            return (
+              <div
+                key={index}
+                className="bg-slate-700 rounded-lg overflow-hidden shadow-lg transition-all duration-200"
+              >
+                {/* Question Header */}
+                <div 
+                  className="px-5 py-4 flex justify-between items-center cursor-pointer"
+                  onClick={() => toggleQuestion(index)}
+                >
+                  <div>
+                    <span className="text-amber-400 font-medium">Question {index + 1}</span>
+                    <h3 className="text-white text-lg font-medium mt-1">
                       {qaPair.question}
-                    </div>
-                    {qaPair.question_type !== "Boolean" && (
+                    </h3>
+                  </div>
+                  <div className="text-amber-400">
+                    {expandedQuestions[index] ? <FaChevronUp /> : <FaChevronDown />}
+                  </div>
+                </div>
+                
+                {/* Question Details */}
+                {expandedQuestions[index] && (
+                  <div className="px-5 py-4 bg-slate-800 border-t border-slate-600">
+                    {qaPair.question_type !== "Boolean" ? (
                       <>
-                        <div className="text-[#E4E4E4] text-sm">Answer</div>
-                        <div className="text-[#FFF4F4] text-[1rem]">
-                          {qaPair.answer}
+                        <div className="mb-3">
+                          <span className="text-gray-400 text-sm block mb-1">Answer:</span>
+                          <div className="text-white font-medium bg-slate-700 px-3 py-2 rounded-md">
+                            {qaPair.answer}
+                          </div>
                         </div>
+                        
                         {qaPair.options && qaPair.options.length > 0 && (
-                          <div className="text-[#FFF4F4] text-[1rem]">
-                            {shuffledOptions.map((option, idx) => (
-                              <div key={idx}>
-                                <span className="text-[#E4E4E4] text-sm">
-                                  Option {idx + 1}:
-                                </span>{" "}
-                                <span className="text-[#FFF4F4] text-[1rem]">
+                          <div>
+                            <span className="text-gray-400 text-sm block mb-2">Options:</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {shuffledOptions.map((option, idx) => (
+                                <div 
+                                  key={idx} 
+                                  className={`px-3 py-2 rounded-md text-sm ${
+                                    option === qaPair.answer 
+                                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" 
+                                      : "bg-slate-700 text-gray-200"
+                                  }`}
+                                >
                                   {option}
-                                </span>
-                              </div>
-                            ))}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </>
+                    ) : (
+                      <div className="mb-3">
+                        <span className="text-gray-400 text-sm block mb-1">Type:</span>
+                        <div className="text-white font-medium bg-slate-700 px-3 py-2 rounded-md">
+                          True/False Question
+                        </div>
+                      </div>
                     )}
                   </div>
-                );
-              })}
-          </div>
-          <div className="items-center flex justify-center gap-6 mx-auto">
-            <button
-              className="bg-[#518E8E] items-center flex gap-1 my-2 font-semibold text-white px-2 py-2 rounded-xl"
-              onClick={generateGoogleForm}
-            >
-              Generate Google form
-            </button>
-            <div className="relative">
-              <button
-                className="bg-[#518E8E] items-center flex gap-1 my-2 font-semibold text-white px-2 py-2 rounded-xl"
-                onClick={() => document.getElementById('pdfDropdown').classList.toggle('hidden')}
-              >
-                Generate PDF
-              </button>
-              <div
-                id="pdfDropdown"
-                className="hidden absolute bottom-full mb-1 bg-[#02000F] shadow-md text-white rounded-lg shadow-lg"
-              >
-                <button
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-500 rounded-t-lg"
-                  onClick={() => generatePDF('questions')}
-                >
-                  Questions Only
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-500"
-                  onClick={() => generatePDF('questions_answers')}
-                >
-                  Questions with Answers
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-500 rounded-b-lg"
-                  onClick={() => generatePDF('answers')}
-                >
-                  Answers Only
-                </button>
+                )}
               </div>
+            );
+          })}
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex flex-wrap justify-center gap-4">
+          <button
+            onClick={generateGoogleForm}
+            className="bg-slate-700 hover:bg-slate-600 text-white px-5 py-3 rounded-lg transition duration-300 flex items-center"
+          >
+            <FaGoogle className="mr-2 text-amber-400" />
+            Generate Google Form
+          </button>
+          
+          <div className="relative">
+            <button
+              className="dropdown-toggle bg-slate-700 hover:bg-slate-600 text-white px-5 py-3 rounded-lg transition duration-300 flex items-center"
+              onClick={() => document.getElementById('pdfDropdown').classList.toggle('hidden')}
+            >
+              <FaFilePdf className="mr-2 text-amber-400" />
+              Generate PDF
+            </button>
+            
+            <div
+              id="pdfDropdown"
+              className="hidden absolute right-0 mt-2 w-56 bg-slate-900 rounded-lg shadow-xl z-10 border border-slate-700"
+            >
+              <button
+                className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700 rounded-t-lg"
+                onClick={() => generatePDF('questions')}
+              >
+                Questions Only
+              </button>
+              <button
+                className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700 border-t border-slate-700"
+                onClick={() => generatePDF('questions_answers')}
+              >
+                Questions with Answers
+              </button>
+              <button
+                className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700 rounded-b-lg border-t border-slate-700"
+                onClick={() => generatePDF('answers')}
+              >
+                Answers Only
+              </button>
             </div>
           </div>
         </div>
