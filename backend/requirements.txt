@@ -31,3 +31,4 @@ tokenizers
 mammoth
 mediawikiapi
 PyMuPDF
+yt-dlp==2023.11.16

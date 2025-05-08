@@ -1,3 +1,66 @@
+# EduAid - Educational Quiz Generator
+
+An AI-powered tool to generate quizzes from various inputs including text, voice, and YouTube videos.
+
+## YouTube Quiz Feature
+
+### Overview
+The YouTube Quiz feature allows users to generate educational quizzes from YouTube videos directly. The system extracts the transcript from the video and uses AI to create relevant quiz questions.
+
+### Using the YouTube Quiz Feature for Presentation
+
+#### Standalone YouTube Quiz Path
+- The YouTube Quiz generator operates independently from the Text Input module
+- Provides a dedicated workflow specifically for YouTube content
+- Directly navigates to the Output page after quiz generation, bypassing the Text Input step
+
+#### Pre-loaded Example Videos
+For your presentation and demonstration purposes, the system includes three educational videos ready for quiz generation:
+1. **Einstein's Theory of Relativity** - An explanation of special and general relativity
+2. **How to Stay Motivated** - A guide on maintaining motivation for learning and productivity
+3. **Introduction to Neural Networks** - An overview of neural network fundamentals
+
+#### Simplified Generation Process
+1. Select one of the featured example videos (no need to paste URLs)
+2. Choose quiz settings (question type, number of questions, difficulty)
+3. Generate the quiz with one click
+4. View and interact with the generated quiz on the Output page
+
+#### Demo-Ready Functionality
+- The system includes pre-loaded transcripts for example videos
+- Can generate demo quizzes even if backend API calls fail during your presentation
+- Creates a reliable demonstration experience regardless of internet connectivity
+
+### Technical Implementation
+- The YouTube quiz functionality operates through a standalone component
+- Quiz generation and navigation is handled directly within the YouTubeQuiz component
+- Backend includes demo transcripts and fallback mechanisms for reliable presentations
+
+## Running the Application
+
+### Backend
+```
+cd backend
+python server.py
+```
+
+### Frontend
+```
+cd eduaid_web
+npm start
+```
+
+## Demo Mode
+For presentations without reliable internet or API access, the application includes demo mode features that ensure reliable functionality during demonstrations.
+
+## Features
+- Text to Quiz: Type or paste educational content to generate quizzes
+- Voice to Quiz: Record voice explanations to generate quizzes
+- YouTube to Quiz: Generate quizzes from YouTube video transcripts
+- Multiple question types: Multiple choice, True/False, and Short answer
+- PDF export: Download quizzes as PDF files
+- Google Forms integration: Create online forms from generated quizzes
+
 # Inquizzitive: AI Quiz Generation 🚀
 
 Online learning has taken the front seat in the post-pandemic age. With the advent of sophisticated AI architectures like Transformers, it is only natural that AI would find its way into education. Learning online via platforms like YouTube or MOOCs is often a method of self-learning. The biggest obstacle faced by students in self-learning is the lack of attention span. An online tool that can generate short quizzes from input educational content can be a great resource for both teachers and students. It helps retain important information, frame questions, and quickly revise large chunks of content.

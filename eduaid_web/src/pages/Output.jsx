@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import "../index.css";
-import { FaArrowLeft, FaFilePdf, FaGoogle, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaArrowLeft, FaFilePdf, FaGoogle, FaChevronDown, FaChevronUp, FaYoutube } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Output = () => {
   const [qaPairs, setQaPairs] = useState([]);
   const [questionType, setQuestionType] = useState(
-    localStorage.getItem("selectedQuestionType")
+    localStorage.getItem("questionType") || localStorage.getItem("selectedQuestionType") || "mcq"
   );
   const [pdfMode, setPdfMode] = useState("questions");
   const [expandedQuestions, setExpandedQuestions] = useState({});
+  const [transcript, setTranscript] = useState("");
+  const [videoId, setVideoId] = useState("");
+  const [sourceType, setSourceType] = useState("text");
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -44,11 +47,22 @@ const Output = () => {
   };
 
   useEffect(() => {
-    const qaPairsFromStorage =
-      JSON.parse(localStorage.getItem("qaPairs")) || {};
+    // Check for YouTube video data first
+    const storedVideoId = localStorage.getItem("videoId");
+    const storedTranscript = localStorage.getItem("voiceTranscript");
+    
+    if (storedVideoId && storedTranscript) {
+      setVideoId(storedVideoId);
+      setTranscript(storedTranscript);
+      setSourceType("youtube");
+    }
+    
+    // Load quiz data
+    const qaPairsFromStorage = JSON.parse(localStorage.getItem("qaPairs")) || {};
     if (qaPairsFromStorage) {
       const combinedQaPairs = [];
 
+      // Process output_boolq (boolean questions)
       if (qaPairsFromStorage["output_boolq"]) {
         qaPairsFromStorage["output_boolq"]["Boolean_Questions"].forEach(
           (question, index) => {
@@ -61,6 +75,7 @@ const Output = () => {
         );
       }
 
+      // Process output_mcq (multiple choice questions)
       if (qaPairsFromStorage["output_mcq"]) {
         qaPairsFromStorage["output_mcq"]["questions"].forEach((qaPair) => {
           combinedQaPairs.push({
@@ -73,41 +88,44 @@ const Output = () => {
         });
       }
 
-      if ((qaPairsFromStorage["output_mcq"] || questionType === "get_mcq") && qaPairsFromStorage["output"]) {
-        qaPairsFromStorage["output"].forEach((qaPair) => {
-          combinedQaPairs.push({
-            question: qaPair.question_statement,
-            question_type: "MCQ",
-            options: qaPair.options,
-            answer: qaPair.answer,
-            context: qaPair.context,
+      // Process standard output format based on question type
+      if (qaPairsFromStorage["output"]) {
+        if (questionType === "get_mcq" || questionType === "mcq") {
+          // Process MCQ output
+          qaPairsFromStorage["output"].forEach((qaPair) => {
+            combinedQaPairs.push({
+              question: qaPair.question_statement,
+              question_type: "MCQ",
+              options: qaPair.options,
+              answer: qaPair.answer,
+              context: qaPair.context,
+            });
           });
-        });
-      }
-
-      if (questionType == "get_boolq" && qaPairsFromStorage["output"]) {
-        qaPairsFromStorage["output"].forEach((qaPair) => {
-          combinedQaPairs.push({
-            question: qaPair,
-            question_type: "Boolean",
+        } else if (questionType === "get_boolq" || questionType === "boolean") {
+          // Process Boolean output
+          qaPairsFromStorage["output"].forEach((qaPair) => {
+            combinedQaPairs.push({
+              question: qaPair,
+              question_type: "Boolean",
+            });
           });
-        });
-      } else if (qaPairsFromStorage["output"] && questionType !== "get_mcq") {
-        qaPairsFromStorage["output"].forEach((qaPair) => {
-          combinedQaPairs.push({
-            question:
-              qaPair.question || qaPair.question_statement || qaPair.Question,
-            options: qaPair.options,
-            answer: qaPair.answer || qaPair.Answer,
-            context: qaPair.context,
-            question_type: "Short",
+        } else if (questionType === "get_shortq" || questionType === "shortanswer") {
+          // Process Short Answer output
+          qaPairsFromStorage["output"].forEach((qaPair) => {
+            combinedQaPairs.push({
+              question: qaPair.question || qaPair.question_statement || qaPair.Question,
+              options: qaPair.options,
+              answer: qaPair.answer || qaPair.Answer,
+              context: qaPair.context,
+              question_type: "Short",
+            });
           });
-        });
+        }
       }
 
       setQaPairs(combinedQaPairs);
     }
-  }, []);
+  }, [questionType]);
 
   const generateGoogleForm = async () => {
     const response = await fetch(`${process.env.REACT_APP_BASE_URL}/generate_gform`, {
@@ -317,11 +335,11 @@ const Output = () => {
     <div className="w-screen min-h-screen bg-slate-800 overflow-x-hidden">
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-slate-700/40 to-slate-900 opacity-70 fixed"></div>
       
-      <div className="relative z-10 max-w-4xl mx-auto px-6 py-8">
+      <div className="relative z-10 max-w-screen-lg mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <Link to="/text-input" className="text-gray-400 hover:text-amber-400 flex items-center">
-            <FaArrowLeft className="mr-2" /> Back
+          <Link to="/" className="text-gray-400 hover:text-white flex items-center">
+            <FaArrowLeft className="mr-2" /> Back Home
           </Link>
           
           <div className="text-3xl text-center font-bold">
@@ -333,137 +351,200 @@ const Output = () => {
             </span>
           </div>
           
-          <div className="w-20"></div> {/* Empty div for flexbox alignment */}
-        </div>
-        
-        {/* Main Content Title */}
-        <div className="text-center mb-8">
-          <h2 className="text-white text-2xl font-medium mb-2">Generated Quiz</h2>
-          <p className="text-gray-300 text-lg">
-            {qaPairs.length} {qaPairs.length === 1 ? 'question' : 'questions'} created
-          </p>
-        </div>
-        
-        {/* Questions List */}
-        <div className="space-y-4 mb-10">
-          {qaPairs.map((qaPair, index) => {
-            const combinedOptions = qaPair.options
-              ? [...qaPair.options, qaPair.answer]
-              : [qaPair.answer];
-            const shuffledOptions = shuffleArray(combinedOptions);
-            
-            return (
-              <div
-                key={index}
-                className="bg-slate-700 rounded-lg overflow-hidden shadow-lg transition-all duration-200"
-              >
-                {/* Question Header */}
-                <div 
-                  className="px-5 py-4 flex justify-between items-center cursor-pointer"
-                  onClick={() => toggleQuestion(index)}
-                >
-                  <div>
-                    <span className="text-amber-400 font-medium">Question {index + 1}</span>
-                    <h3 className="text-white text-lg font-medium mt-1">
-                      {qaPair.question}
-                    </h3>
-                  </div>
-                  <div className="text-amber-400">
-                    {expandedQuestions[index] ? <FaChevronUp /> : <FaChevronDown />}
-                  </div>
-                </div>
-                
-                {/* Question Details */}
-                {expandedQuestions[index] && (
-                  <div className="px-5 py-4 bg-slate-800 border-t border-slate-600">
-                    {qaPair.question_type !== "Boolean" ? (
-                      <>
-                        <div className="mb-3">
-                          <span className="text-gray-400 text-sm block mb-1">Answer:</span>
-                          <div className="text-white font-medium bg-slate-700 px-3 py-2 rounded-md">
-                            {qaPair.answer}
-                          </div>
-                        </div>
-                        
-                        {qaPair.options && qaPair.options.length > 0 && (
-                          <div>
-                            <span className="text-gray-400 text-sm block mb-2">Options:</span>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {shuffledOptions.map((option, idx) => (
-                                <div 
-                                  key={idx} 
-                                  className={`px-3 py-2 rounded-md text-sm ${
-                                    option === qaPair.answer 
-                                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" 
-                                      : "bg-slate-700 text-gray-200"
-                                  }`}
-                                >
-                                  {option}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="mb-3">
-                        <span className="text-gray-400 text-sm block mb-1">Type:</span>
-                        <div className="text-white font-medium bg-slate-700 px-3 py-2 rounded-md">
-                          True/False Question
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        
-        {/* Action Buttons */}
-        <div className="flex flex-wrap justify-center gap-4">
-          <button
-            onClick={generateGoogleForm}
-            className="bg-slate-700 hover:bg-slate-600 text-white px-5 py-3 rounded-lg transition duration-300 flex items-center"
-          >
-            <FaGoogle className="mr-2 text-amber-400" />
-            Generate Google Form
-          </button>
-          
-          <div className="relative">
+          <div className="flex space-x-3">
             <button
-              className="dropdown-toggle bg-slate-700 hover:bg-slate-600 text-white px-5 py-3 rounded-lg transition duration-300 flex items-center"
-              onClick={() => document.getElementById('pdfDropdown').classList.toggle('hidden')}
+              className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg flex items-center"
+              onClick={generateGoogleForm}
             >
-              <FaFilePdf className="mr-2 text-amber-400" />
-              Generate PDF
+              <FaGoogle className="mr-2" /> Generate Form
             </button>
             
-            <div
-              id="pdfDropdown"
-              className="hidden absolute right-0 mt-2 w-56 bg-slate-900 rounded-lg shadow-xl z-10 border border-slate-700"
-            >
+            <div className="relative">
               <button
-                className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700 rounded-t-lg"
-                onClick={() => generatePDF('questions')}
+                className="dropdown-toggle bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center"
+                onClick={() => {
+                  const dropdown = document.getElementById("pdfDropdown");
+                  dropdown.classList.toggle("hidden");
+                }}
               >
-                Questions Only
+                <FaFilePdf className="mr-2" /> Export PDF <FaChevronDown className="ml-2" />
               </button>
-              <button
-                className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700 border-t border-slate-700"
-                onClick={() => generatePDF('questions_answers')}
+              
+              <div
+                id="pdfDropdown"
+                className="absolute right-0 mt-2 w-48 bg-slate-700 rounded-lg shadow-lg hidden overflow-hidden z-10"
               >
-                Questions with Answers
-              </button>
-              <button
-                className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700 rounded-b-lg border-t border-slate-700"
-                onClick={() => generatePDF('answers')}
-              >
-                Answers Only
-              </button>
+                <button
+                  onClick={() => {
+                    setPdfMode("questions");
+                    generatePDF("questions");
+                  }}
+                  className="w-full text-left px-4 py-2 text-white hover:bg-slate-600"
+                >
+                  Questions Only
+                </button>
+                <button
+                  onClick={() => {
+                    setPdfMode("answers");
+                    generatePDF("answers");
+                  }}
+                  className="w-full text-left px-4 py-2 text-white hover:bg-slate-600"
+                >
+                  Questions with Answers
+                </button>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Video Player (if from YouTube) */}
+        {sourceType === "youtube" && videoId && (
+          <div className="mb-8 bg-slate-700/80 rounded-xl overflow-hidden shadow-lg">
+            <div className="p-4 flex items-center border-b border-slate-600">
+              <div className="bg-red-500/20 p-2 rounded-full mr-3">
+                <FaYoutube className="text-red-500" size={24} />
+              </div>
+              <h2 className="text-xl font-bold text-white">YouTube Quiz Source</h2>
+            </div>
+            
+            <div className="relative pb-[56.25%] w-full">
+              <iframe
+                className="absolute top-0 left-0 w-full h-full"
+                src={`https://www.youtube.com/embed/${videoId}`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        )}
+        
+        {/* Generated Questions */}
+        <div className="bg-slate-700/80 rounded-xl p-6 shadow-lg">
+          <h2 className="text-2xl font-bold text-white mb-6">Generated Questions</h2>
+          
+          {qaPairs.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">
+              No questions generated yet. Try creating a new quiz.
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {qaPairs.map((qaPair, idx) => (
+                <div
+                  key={idx}
+                  className="bg-slate-800/70 rounded-lg p-4 border border-slate-700 hover:border-slate-500 transition-colors"
+                >
+                  <div
+                    className="flex justify-between items-start cursor-pointer"
+                    onClick={() => toggleQuestion(idx)}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center">
+                        <span className="bg-amber-500 text-white text-sm font-medium px-2 py-1 rounded mr-3">
+                          {qaPair.question_type}
+                        </span>
+                        <h3 className="text-lg font-medium text-white">
+                          Question {idx + 1}
+                        </h3>
+                      </div>
+                      <p className="text-gray-200 mt-2">{qaPair.question}</p>
+                    </div>
+                    <button className="ml-4 text-gray-400 hover:text-white">
+                      {expandedQuestions[idx] ? (
+                        <FaChevronUp />
+                      ) : (
+                        <FaChevronDown />
+                      )}
+                    </button>
+                  </div>
+                  
+                  {expandedQuestions[idx] && (
+                    <div className="mt-4 border-t border-slate-700 pt-4">
+                      {qaPair.question_type === "MCQ" && (
+                        <div>
+                          <h4 className="text-md font-medium text-gray-300 mb-2">
+                            Options:
+                          </h4>
+                          <ul className="space-y-2">
+                            {qaPair.options?.map((option, optIdx) => (
+                              <li
+                                key={optIdx}
+                                className={`p-2 rounded ${
+                                  option === qaPair.answer
+                                    ? "bg-green-500/20 border border-green-500/40 text-green-300"
+                                    : "bg-slate-700 text-gray-300"
+                                }`}
+                              >
+                                {option}
+                                {option === qaPair.answer && (
+                                  <span className="ml-2 text-xs font-medium bg-green-600 text-white px-2 py-0.5 rounded">
+                                    CORRECT
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {qaPair.question_type === "Boolean" && (
+                        <div>
+                          <h4 className="text-md font-medium text-gray-300 mb-2">
+                            Options:
+                          </h4>
+                          <div className="flex space-x-4">
+                            <div className="flex-1 p-2 rounded bg-slate-700 text-gray-300 text-center">
+                              True
+                            </div>
+                            <div className="flex-1 p-2 rounded bg-slate-700 text-gray-300 text-center">
+                              False
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {qaPair.question_type === "Short" && qaPair.answer && (
+                        <div>
+                          <h4 className="text-md font-medium text-gray-300 mb-2">
+                            Answer:
+                          </h4>
+                          <div className="p-3 bg-green-500/20 border border-green-500/40 rounded text-green-300">
+                            {qaPair.answer}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {qaPair.context && (
+                        <div className="mt-4">
+                          <h4 className="text-md font-medium text-gray-300 mb-2">
+                            Context:
+                          </h4>
+                          <div className="p-3 bg-slate-700 rounded text-gray-300 max-h-40 overflow-y-auto">
+                            {qaPair.context}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        {/* Back to YouTube Button */}
+        {sourceType === "youtube" && (
+          <div className="mt-6 text-center">
+            <Link
+              to="/youtube-quiz"
+              className="inline-flex items-center justify-center px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition-colors"
+            >
+              <FaYoutube className="mr-2" />
+              Create Another YouTube Quiz
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
