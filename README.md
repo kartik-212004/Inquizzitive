@@ -1,7 +1,3 @@
-Here’s a concise and cleaned-up version of your **Inquizzitive: AI Quiz Generation** project overview and setup guide:
-
----
-
 # Inquizzitive: AI Quiz Generation 🚀
 
 **Inquizzitive** is a browser extension and web app that generates quizzes from educational content using AI. It's designed to support self-learning by turning text, files, or Google Docs into engaging questions.
